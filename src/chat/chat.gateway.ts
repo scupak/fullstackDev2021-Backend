@@ -5,36 +5,40 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import {Socket} from "socket.io";
+import { Socket } from 'socket.io';
+import { ChatService } from './shared/chat.service';
 
 @WebSocketGateway()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  constructor(private chatService: ChatService) {}
+
   @WebSocketServer() server;
   private userMap: Map<string, string> = new Map<string, string>();
   @SubscribeMessage('message')
-  handleChatEvent(@MessageBody() data: string): string {
-    console.log(data);
-    this.server.emit('messages', data);
-    return data + ' Hello';
-  }
-
-  @SubscribeMessage('name')
-  handleNameEvent(@MessageBody() name: string,
+  handleChatEvent(
+    @MessageBody() message: string,
     @ConnectedSocket() client: Socket,
-  ): string {
-    this.userMap.set(client.id, name);
-    this.server.emit('clients', Array.from(this.userMap.values()));
-    console.log('map ', this.userMap);
-    return name + ' Hello';
+  ): void {
+    const chatMessage = this.chatService.addMessage(message, client.id);
+    this.server.emit('newMessage', chatMessage);
   }
 
-  handleConnection(client: any, ...args: any[]): any {
-    console.log('Client Connect', client.id);
+  @SubscribeMessage('nickname')
+  handleNicknameEvent(
+    @MessageBody() nickname: string,
+    @ConnectedSocket() client: Socket,
+  ): void {
+    this.chatService.addClient(client.id, nickname);
+    this.server.emit('clients', this.chatService.getClients());
   }
 
-  handleDisconnect(client: any): any {
-    this.userMap.delete(client.id);
-    this.server.emit('client', this.userMap.values())
-    console.log('Client Disconnect', client.id);
+  handleConnection(client: Socket, ...args: any[]): any {
+    client.emit('allMessages', this.chatService.getMessages());
+    this.server.emit('clients', this.chatService.getClients());
+  }
+
+  handleDisconnect(client: Socket): any {
+    this.chatService.deleteClient(client.id);
+    this.server.emit('clients', this.chatService.getClients());
   }
 }
