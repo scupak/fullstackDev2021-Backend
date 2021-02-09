@@ -14,9 +14,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @WebSocketServer() server;
   @SubscribeMessage('message')
-  handleChatEvent(@MessageBody() message: string): void {
-    this.chatService.addMessage(message);
-    this.server.emit('newMessage', message);
+  handleChatEvent(
+    @MessageBody() message: string,
+    @ConnectedSocket() client: Socket,
+  ): void {
+    const chatMessage = this.chatService.addMessage(message, client.id);
+    this.server.emit('newMessage', chatMessage);
   }
 
   @SubscribeMessage('nickname')
