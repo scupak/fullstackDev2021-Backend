@@ -1,6 +1,7 @@
 import { ChatClient } from './chat-client.model';
+import { MessageDTO } from './MessageDTO';
 
 export interface ChatMessage {
-  message: string;
+  message: MessageDTO;
   sender: ChatClient;
 }

@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { ChatClient } from './chat-client.model';
 import { ChatMessage } from './chat-message.model';
+import { MessageDTO } from "./MessageDTO";
 
 @Injectable()
 export class ChatService {
   allMessages: ChatMessage[] = [];
   clients: ChatClient[] = [];
 
-  addMessage(message: string, clientId: string): ChatMessage {
+  addMessage(message: MessageDTO, clientId: string): ChatMessage {
     const client = this.clients.find((c) => c.id === clientId);
     const chatMessage: ChatMessage = { message: message, sender: client };
     this.allMessages.push(chatMessage);

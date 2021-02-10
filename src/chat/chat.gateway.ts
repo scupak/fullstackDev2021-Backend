@@ -10,6 +10,8 @@ import {
 import { Socket } from 'socket.io';
 import { ChatService } from './shared/chat.service';
 import { WelcomeDto } from './shared/welcome.dto';
+import * as moment from 'moment';
+import { MessageDTO } from './shared/MessageDTO';
 
 @WebSocketGateway()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -18,7 +20,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server;
   @SubscribeMessage('message')
   handleChatEvent(
-    @MessageBody() message: string,
+    @MessageBody() message: MessageDTO,
     @ConnectedSocket() client: Socket,
   ): void {
     const chatMessage = this.chatService.addMessage(message, client.id);
