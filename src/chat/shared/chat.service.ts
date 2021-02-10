@@ -23,7 +23,7 @@ export class ChatService {
       return chatClient;
     }
     if(this.clients.find((c) => c.nickname === nickname)){
-      throw new Error('Ncikname already used');
+      throw new Error('Nickname already used');
     }
     chatClient = { id: id, nickname: nickname };
     this.clients.push(chatClient);
