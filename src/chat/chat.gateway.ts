@@ -18,6 +18,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(private chatService: ChatService) {}
 
   @WebSocketServer() server;
+
   @SubscribeMessage('message')
   handleChatEvent(
     @MessageBody() message: MessageDTO,
@@ -26,20 +27,33 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const chatMessage = this.chatService.addMessage(message, client.id);
     this.server.emit('newMessage', chatMessage);
   }
+@SubscribeMessage('typing')
+  handleTypingEvent(
+    @MessageBody() typing: boolean,
+    @ConnectedSocket() client: Socket,
+  ): void {
+    const clientlist = this.chatService.typing(typing, client);
+    this.server.emit('typing', clientlist);
+  }
 
   @SubscribeMessage('nickname')
   handleNicknameEvent(
     @MessageBody() nickname: string,
     @ConnectedSocket() client: Socket,
   ): void {
-    const chatClient = this.chatService.addClient(client.id, nickname);
-    const welcome: WelcomeDto = {
-      clients: this.chatService.getClients(),
-      messages: this.chatService.getMessages(),
-      client: chatClient,
-    };
-    client.emit('welcome', welcome);
-    this.server.emit('clients', this.chatService.getClients());
+    try {
+      const chatClient = this.chatService.addClient(client.id, nickname);
+      const welcome: WelcomeDto = {
+        clients: this.chatService.getClients(),
+        messages: this.chatService.getMessages(),
+        client: chatClient,
+      };
+      client.emit('welcome', welcome);
+      this.server.emit('clients', this.chatService.getClients());
+      this.server.emit('typing', this.chatService.typingClients);
+    } catch (e) {
+      client.error(e);
+    }
   }
 
   handleConnection(client: Socket, ...args: any[]): any {
@@ -50,5 +64,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleDisconnect(client: Socket): any {
     this.chatService.deleteClient(client.id);
     this.server.emit('clients', this.chatService.getClients());
+    this.server.emit('typing', this.chatService.typingClients);
   }
 }
