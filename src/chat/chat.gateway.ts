@@ -14,6 +14,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(private chatService: ChatService) {}
 
   @WebSocketServer() server;
+
   @SubscribeMessage('message')
   handleChatEvent(
     @MessageBody() message: string,
@@ -21,6 +22,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ): void {
     const chatMessage = this.chatService.addMessage(message, client.id);
     this.server.emit('newMessage', chatMessage);
+  }
+
+  @SubscribeMessage('typing')
+  handleTypingEvent(
+    @MessageBody() typing: boolean,
+    @ConnectedSocket() client: Socket,
+  ): void {
+    const chatClient = this.chatService.updateTyping(typing, client.id);
+    if (chatClient) {
+      this.server.emit('clientTyping', chatClient);
+    }
   }
 
   @SubscribeMessage('nickname')
