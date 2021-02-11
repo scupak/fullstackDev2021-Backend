@@ -38,7 +38,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.emit('welcome', welcome);
       this.server.emit('clients', this.chatService.getClients());
     } catch (e) {
-      client.error(e);
+      client.error(e.message);
     }
   }
 
