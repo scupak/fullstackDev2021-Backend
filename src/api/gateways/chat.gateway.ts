@@ -6,12 +6,18 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
-import { ChatService } from './shared/chat.service';
-import { WelcomeDto } from './shared/welcome.dto';
+import { WelcomeDto } from '../dtos/welcome.dto';
+import { Inject } from '@nestjs/common';
+import {
+  IChatService,
+  IChatServiceProvider,
+} from '../../core/primary-ports/chat.service.interface';
 
 @WebSocketGateway()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  constructor(private chatService: ChatService) {}
+  constructor(
+    @Inject(IChatServiceProvider) private chatService: IChatService,
+  ) {}
 
   @WebSocketServer() server;
 
