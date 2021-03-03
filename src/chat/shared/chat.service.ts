@@ -3,11 +3,19 @@ import { ChatClient } from './chat-client.model';
 import { ChatMessage } from './chat-message.model';
 import { MessageDTO } from './MessageDTO';
 import SocketIO, { Socket } from 'socket.io';
+import { InjectRepository } from '@nestjs/typeorm';
+import Client from '../../database/client.entity';
+import { Repository } from 'typeorm';
 @Injectable()
 export class ChatService {
   allMessages: ChatMessage[] = [];
   clients: ChatClient[] = [];
   typingClients: ChatClient[] = [];
+
+  constructor(
+    @InjectRepository(Client)
+    private postsRepository: Repository<Client>,
+  ) {}
 
   addMessage(message: MessageDTO, clientId: string): ChatMessage {
     const client = this.clients.find((c) => c.id === clientId);
@@ -17,12 +25,14 @@ export class ChatService {
   }
 
   addClient(id: string, nickname: string): ChatClient {
-    let chatClient = this.clients.find((c) => c.nickname === nickname && c.id === id);
+    let chatClient = this.clients.find(
+      (c) => c.nickname === nickname && c.id === id,
+    );
 
-    if(chatClient){
+    if (chatClient) {
       return chatClient;
     }
-    if(this.clients.find((c) => c.nickname === nickname)){
+    if (this.clients.find((c) => c.nickname === nickname)) {
       throw new Error('Nickname already used');
     }
     chatClient = { id: id, nickname: nickname };
@@ -53,7 +63,7 @@ export class ChatService {
         return this.typingClients;
       }
     } else {
-      if (this.typingClients.find((c) => c.id == client.id)){
+      if (this.typingClients.find((c) => c.id == client.id)) {
         this.typingClients = this.typingClients.filter(
           (c) => c.id !== client.id,
         );
