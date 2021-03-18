@@ -1,11 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 class Client {
-  @PrimaryGeneratedColumn()
-  public id: number;
+  @PrimaryColumn({ unique: true })
+  public id: string;
 
-  @Column()
+  @Column({ unique: true })
   public nickname: string;
 }
 
