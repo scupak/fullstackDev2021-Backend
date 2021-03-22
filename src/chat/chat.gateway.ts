@@ -12,6 +12,8 @@ import { ChatService } from './shared/chat.service';
 import { WelcomeDto } from './shared/welcome.dto';
 import * as moment from 'moment';
 import { MessageDTO } from './shared/MessageDTO';
+import {v4 as uuidv4} from 'uuid';
+
 
 @WebSocketGateway()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -43,7 +45,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
   ): Promise<void> {
     try {
-      const chatClient = await this.chatService.addClient(client.id, nickname);
+      const uid = uuidv4();
+      const chatClient = await this.chatService.addClient(uid, nickname);
       const chatClients = await this.chatService.getClients();
       const messages = await this.chatService.getMessages();
       console.log('chatClient', chatClient);

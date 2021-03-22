@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import Client from './client.entity';
-import {Message} from "./message.entity";
+import { Message } from './message.entity';
 
 @Module({
   imports: [

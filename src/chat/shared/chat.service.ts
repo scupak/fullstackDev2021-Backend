@@ -28,7 +28,7 @@ export class ChatService {
     const client = await this.clientRepository.findOne({
       id: clientId,
     });
-    let messageDb = this.messageRepository.create();
+    let messageDb = await this.messageRepository.create();
 
     messageDb.senderId = clientId;
     messageDb.sender = client.nickname;
